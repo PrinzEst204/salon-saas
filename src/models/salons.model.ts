@@ -29,6 +29,10 @@ const salonSchema = new Schema<ISalon>({
         required: true,
         trim: true,
     },
-});
+},
+{
+    timestamps: true,
+}
+);
 
 export const  Salon = model<ISalon>("Salon", salonSchema);

@@ -33,6 +33,10 @@ const serviceSchema = new Schema<IService>({
         required: true,
         trim: true,
     },
-});
+},
+{
+    timestamps: true,
+}
+);
 
 export const Service = model<IService>("Service", serviceSchema);
