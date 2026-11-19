@@ -20,6 +20,11 @@ const appointmentSchema = new Schema<IAppointment>(
             required: true,
         },
 
+        serviceId: {
+            type: Schema.Types.ObjectId,
+            required: true,
+        },
+
         appointmentDate: {
             type: Date,
             required: true,

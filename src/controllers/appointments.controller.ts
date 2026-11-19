@@ -32,6 +32,38 @@ export const createAppointment = async ( req: Request, res: Response ) => {
             return res.status(400).json({message: "Service does not belong to this salon",});
         }
 
+          const startTime = new Date(appointmentDate);
+
+        const endTime = new Date(startTime.getTime() + service.duration * 60 * 1000);
+
+        const existingAppointments = await Appointment.find({salonId, status:"booked", appointmentDate:
+            {$lt: endTime,},
+        })
+
+        for (const existingAppointment of existingAppointments) {
+            const existingService = await Service.findById(
+                existingAppointment.serviceId
+            );
+
+            if (!existingService) {
+                continue;
+            }
+
+            const existingStart = new Date(
+                existingAppointment.appointmentDate
+            );
+
+            const existingEnd = new Date(
+                existingStart.getTime() + 
+                existingService.duration * 60 * 1000
+            );
+
+            if (startTime < existingEnd && endTime > existingStart ) {
+                return res.status(409).json({message: "This time slot is already booked",});
+            }
+        }
+
+
         const appointment = await Appointment.create( { salonId, customerId, serviceId, appointmentDate} );
 
         res.status(201).json(appointment);
