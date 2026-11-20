@@ -72,14 +72,31 @@ export const createAppointment = async ( req: Request, res: Response ) => {
     }
 };
 
-export const getAppointmentBySalon = async ( req: Request, res: Response ) => {
+// GET ALL APPOINTMENTS
+export const getAppointments = async (req: Request, res: Response) => {
     try {
-        const { salonId } = req.params;
+        const appointments = await Appointment.find().populate("customerId").populate("serviceId");
+        res.status(200).json({ appointments});
+    } catch (error) {
+        res.status(500).json({ message: "Failed to fetch appointments", error });
+    }
+};
 
-        const appointments = await Appointment.find( { salonId });
+// GET APPOINTMENT BY ID
+export const getAppointmentById = async (req: Request, res: Response) => {
+    try {
+        const appointmentId = req.params.id;
 
-        res.status(200).json(appointments);
-    }catch(error) {
-        res.status(500).json({ message: "Failed to fetch appointments", error});
+        const appointment = await Appointment.findById(appointmentId)
+            .populate("customerId")
+            .populate("serviceId");
+
+        if (!appointment) {
+            return res.status(404).json({ message: "Appointment not found" });
+        }
+
+        res.status(200).json({ appointment });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to fetch appointment", error });
     }
 };
