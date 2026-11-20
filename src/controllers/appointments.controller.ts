@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Appointment } from "../models/appointments.model";
 import { Service } from "../models/services.model";
 import { Customer } from "../models/customers.model";
+import { Salon } from "../models/salons.model";
 
 export const createAppointment = async ( req: Request, res: Response ) => {
     try{
@@ -81,5 +82,25 @@ export const getAppointmentBySalon = async ( req: Request, res: Response ) => {
         res.status(200).json(appointments);
     }catch(error) {
         res.status(500).json({ message: "Failed to fetch appointments", error});
+    }
+};
+
+export const getAvailableSlots = async ( req: Request, res: Response ) => {
+    try{
+        const { salonId, serviceId, date } = req.query;
+
+        if (!salonId || !serviceId || !date) {
+            return res.status(400).json({ message: "salonId, serviceId and date are required"});
+        }
+
+        const salon = await Salon.findById(salonId);
+
+        if (!salon) {
+            return res.status(404).json({message: "Salon not found",});
+        }
+
+        res.status(200).json({ message: "Salon found", salon});
+    }catch(error) {
+        res.status(500).json({message: "Failed to get available slots", error,});
     }
 };

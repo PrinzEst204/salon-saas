@@ -6,6 +6,8 @@ interface ISalon {
     email: string;
     phone: string;
     address: string;
+    openingTime: string;
+    closingTime: string;
 }
 
 const salonSchema = new Schema<ISalon>({
@@ -29,6 +31,14 @@ const salonSchema = new Schema<ISalon>({
         required: true,
         trim: true,
     },
+    openingTime: {
+        type: String,
+        required: true,
+    },
+    closingTime: {
+        type: String,
+        required: true,
+    }
 },
 {
     timestamps: true,
