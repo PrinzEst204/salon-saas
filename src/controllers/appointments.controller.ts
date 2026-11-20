@@ -159,11 +159,55 @@ export const getAvailableSlots = async (
       });
     }
 
-    res.status(200).json({
-      message: "Salon found",
-      salon,
+    const service = await Service.findById(serviceId);
+
+    if (!service) {
+      return res.status(404).json({ message: "Service not found",});
+    }
+
+    if (service.salonId.toString() !== salonId ) {
+      return res.status(400).json({ message: "Service does not belong tp this salon",});
+    };
+
+    const requestedDate = new Date(date as string);
+
+    if (isNaN(requestedDate.getTime())) {
+      return res.status(400).json({ message: "Invalid date",});
+    }
+
+
+  //day start algorithm
+    const [openingHour, openingMinute] = salon.openingTime.split(":").map(Number);
+
+    const dayStart = new Date(requestedDate);
+
+    dayStart.setHours(openingHour, openingMinute, 0, 0);
+
+  //day end algorithm
+
+    const [closingHour, closingMinute] = salon.closingTime.split(":").map(Number);
+
+    const dayEnd = new Date(requestedDate);
+
+    dayEnd.setHours(closingHour, closingMinute, 0, 0);
+
+    //Knowing which times are already booked/occupied
+
+    const existingAppointments = await Appointment.find({
+      salonId,
+      status: "booked",
+      appointmentDate: {
+        $gte: dayStart,//Get appointments at or after 09:00
+        $lt: dayEnd,//Get appointments before 18:00
+      },
     });
-  } catch (error) {
+
+    res.status(200).json({
+     dayStart, dayEnd, existingAppointments,
+    });
+  }  catch (error) {
+       console.error("AVAILABLE SLOTS ERROR:", error);
+       
     res.status(500).json({
       message: "Failed to get available slots",
       error,
