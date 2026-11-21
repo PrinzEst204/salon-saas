@@ -181,7 +181,9 @@ export const getAvailableSlots = async (
 
     const dayStart = new Date(requestedDate);
 
-    dayStart.setHours(openingHour, openingMinute, 0, 0);
+    //Explict construct to nigerian time zone (UTC+1) to avoid 
+    // time zone issues when comparing with appointment times in the database
+    dayStart.setUTCHours(openingHour - 1, openingMinute, 0, 0)
 
   //day end algorithm
 
@@ -189,7 +191,9 @@ export const getAvailableSlots = async (
 
     const dayEnd = new Date(requestedDate);
 
-    dayEnd.setHours(closingHour, closingMinute, 0, 0);
+        //Explict construct to nigerian time zone (UTC+1) to avoid 
+    // time zone issues when comparing with appointment times in the database
+    dayEnd.setUTCHours(closingHour - 1, closingMinute, 0, 0);
 
     //Knowing which times are already booked/occupied
 
