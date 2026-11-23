@@ -95,7 +95,7 @@ salonClosing.setUTCHours(
 
 //Business hours check
 if (startTime < salonOpening || endTime > salonClosing) {
-  return res.status(400).json({message: "Appointment is outside salon working"})
+  return res.status(400).json({message: "Appointment is outside salon working hours"})
 }
 
 

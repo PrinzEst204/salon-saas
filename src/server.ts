@@ -31,6 +31,6 @@ app.use("/api/appointments", appointmentRoutes);
 
 connectDB().then(() => {
     app.listen(PORT, () => {
-    console.log(`Server is running on https://localhost:${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 })
 });

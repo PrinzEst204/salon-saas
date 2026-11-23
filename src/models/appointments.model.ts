@@ -5,7 +5,7 @@ interface IAppointment {
     customerId: Types.ObjectId;
     serviceId: Types.ObjectId;
     appointmentDate: Date;
-    status: "booked" | "completed" | "canceled";
+    status: "booked" | "completed" | "cancelled";
 }
 
 const appointmentSchema = new Schema<IAppointment>(
