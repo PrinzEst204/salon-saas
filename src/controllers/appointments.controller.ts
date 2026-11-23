@@ -28,6 +28,15 @@ export const createAppointment = async (
       });
     }
 
+    //preventing invalid booking(Knowing if the appointment is within the salon's working hours)
+    const salon = await Salon.findById(salonId);
+
+    if (!salon) {
+      return res.status(404).json({
+        message: "Salon not found",
+      });
+    }
+
     const customer = await Customer.findById(customerId);
 
     if (!customer) {
@@ -61,6 +70,29 @@ export const createAppointment = async (
     const endTime = new Date(
       startTime.getTime() + service.duration * 60 * 1000
     );
+
+    //calculates the end time of the appointment
+    const [openingHour, openingMinute] = salon.openingTime
+.split(":").map(Number);
+
+    const [closingHour, closingMinute] = salon.closingTime
+.split(":").map(Number);
+
+//Creating the opening and closing date objects
+const salonOpening = new Date(startTime);
+
+salonOpening.setUTCHours(
+  openingHour - 1,
+  openingMinute, 0, 0
+);
+
+const salonClosing = new Date(startTime);
+
+salonClosing.setUTCHours(
+  closingHour - 1,
+  closingMinute, 0, 0
+);
+
 
     const existingAppointments = await Appointment.find({
       salonId,
@@ -169,6 +201,7 @@ export const getAvailableSlots = async (
       return res.status(400).json({ message: "Service does not belong tp this salon",});
     };
 
+
     const requestedDate = new Date(date as string);
 
     if (isNaN(requestedDate.getTime())) {
@@ -195,8 +228,16 @@ export const getAvailableSlots = async (
     // time zone issues when comparing with appointment times in the database
     dayEnd.setUTCHours(closingHour - 1, closingMinute, 0, 0);
 
-    //Knowing which times are already booked/occupied
+    //existing appointments
 
+     //Service duration in minutes
+    const serviceDuration = service.duration;
+
+    //Service duration in milliseconds
+    const serviceDurationMs = serviceDuration * 60 * 1000;
+
+
+    //Knowing which times are already booked/occupied
     const existingAppointments = await Appointment.find({
       salonId,
       status: "booked",
@@ -206,8 +247,48 @@ export const getAvailableSlots = async (
       },
     });
 
+    //candidate slot(generating possible booking times)
+    let currentSlot = new Date(dayStart);//We use let because the value needs to change
+
+
+    //generate time slots(creating an empty array that will eventually contain all the times customers can book)
+    const availableSlots: Date[] = [];
+
+    //slots loop
+    while (
+      currentSlot.getTime() + serviceDurationMs <= dayEnd.getTime()
+    ) {
+      let isBooked = false;
+
+      //Calculating when every appointment starts and end
+      for (const appointment of existingAppointments) {
+
+        const appointmentStart = new Date(
+          appointment.appointmentDate
+        );
+        const appointmentEnd = new Date(
+          appointmentStart.getTime() + serviceDurationMs
+        );
+
+        //Checking whether current slot overlaps with existing appointments
+        if (
+          currentSlot < appointmentEnd && currentSlot.getTime() + 
+          serviceDurationMs > appointmentStart.getTime()
+        ) {
+          isBooked = true;
+          break;
+        }  
+      }
+
+      if (!isBooked) {
+        availableSlots.push(new Date(currentSlot));
+      }
+      currentSlot = new Date(currentSlot.getTime() + 
+       serviceDurationMs);
+    }
+
     res.status(200).json({
-     dayStart, dayEnd, existingAppointments,
+     date, serviceDuration, availableSlots,
     });
   }  catch (error) {
        console.error("AVAILABLE SLOTS ERROR:", error);
