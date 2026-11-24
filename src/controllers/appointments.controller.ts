@@ -376,7 +376,7 @@ export const rescheduleAppointment = async ( req: Request, res: Response ) => {
     );
 
     //Salon opening and closing time(Creating the working hours
-    //  boundaries for the new appointment date)
+    //boundaries for the new appointment date)
     const [openingHour, openingMinute] = 
     salon.openingTime.split(":").map(Number);
 
@@ -397,15 +397,51 @@ export const rescheduleAppointment = async ( req: Request, res: Response ) => {
       closingMinute, 0, 0
     );
 
+    //working hours validation for the resceduled appointment
+    if (newDate < salonOpening || newEndTime > salonClosing) {
+      return res.status(400).json({message: "Appointment is outside salon working hours",});
+    }
 
+    //Check for conflict appointments(We need to make sure that when someone reschedules,
+    //  the new time isn't already occupied by another appointment)
+    const existingAppointments = await Appointment.find({
+      salonId: appointment.salonId,
+      status: "booked",
+      _id: { $ne: appointmentId },//meaning "Find other appointments, but dont treat the appointment we're currently rescheduling as a conflict with itself"
+      appointmentDate: { $lt: newEndTime },
+    })
 
+    for (const existingAppointment of existingAppointments) {
+      if (!existingAppointment.serviceId) {
+        continue;
+      }
 
+      const existingService = await Service.findById(
+        existingAppointment.serviceId
+      );
 
+      if (!existingService) {
+        continue;
+      }
 
+      const existingStart = new Date(
+        existingAppointment.appointmentDate
+      );
 
+      const existingEnd = new Date(
+        existingStart.getTime() + existingService.duration * 60 * 1000
+      );
 
+      if ( newDate < existingEnd && newEndTime > existingStart ) {
+        return res.status(409).json({message: "This time slot is already booked",});
+      }
+    }
 
+    appointment.appointmentDate = newDate;
 
+    await appointment.save();
+
+    return res.status(200).json({message: "Appointment rescheduled successfully", appointment,});
 
   }catch(error) {
     res.status(500).json({message: "Failed to reschedule appointment", error});
