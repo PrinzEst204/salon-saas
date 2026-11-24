@@ -329,3 +329,47 @@ export const cancelAppointment = async ( req: Request, res: Response) => {
     });
   }
 };
+
+//Rescheduling an appointment (allows a salon to reschedule an 
+// existing booking instead of deleting it from the database)
+export const rescheduleAppointment = async ( req: Request, res: Response ) => {
+  try{
+    const { appointmentId } = req.params;
+
+    const { appointmentDate } = req.body;
+
+    if (!appointmentDate) {
+      return res.status(400).json({message: "Appointment date is required"})
+    }
+
+    const appointment = await Appointment.findById(appointmentId);
+
+    if (!appointment) {
+      return res.status(404).json({message: "Appointment not found"})
+    }
+
+    //Adding new appointment date to existing appointment
+    const newDate = new Date(appointmentDate);
+
+    if (isNaN(newDate.getTime())) {
+      return res.status(400).json({message: "Invalid appointment date"});
+    }
+
+    //Get the Salon and Services(we need the salon to know the
+    //opening and closing hours), we need the service to know
+    //how long the appointment lasts
+    const salon = await Salon.findById(appointment.salonId);
+
+    if (!salon) {
+      return res.status(404).json({message: "Salon not found"});
+    }
+
+    const service = await Service.findById(appointment.serviceId);
+
+    if (!service) {
+      return res.status(404).json({message: "Service not found",});
+    }
+  }catch(error) {
+    res.status(500).json({message: "Failed to reschedule appointment", error});
+  }
+};
