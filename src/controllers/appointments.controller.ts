@@ -304,3 +304,28 @@ export const getAvailableSlots = async (
     });
   }
 };
+
+//Appointment cancellation(allows a salon cancel
+//existing booking instead of deleting it from the database)
+export const cancelAppointment = async ( req: Request, res: Response) => {
+  try{
+    const { appointmentId } = req.params;
+
+    const appointment = await Appointment.findById(appointmentId);
+
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found"});
+    }
+
+    appointment.status = "cancelled";
+
+    await appointment.save()
+
+    res.status(200).json({ message: "Appointment cancelled successfully", appointment});
+
+  }catch(error){
+    res.status(500).json({
+      message: "Failed to cancel appointment", error
+    });
+  }
+};
