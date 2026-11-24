@@ -369,6 +369,44 @@ export const rescheduleAppointment = async ( req: Request, res: Response ) => {
     if (!service) {
       return res.status(404).json({message: "Service not found",});
     }
+
+    //new appointment end time
+    const newEndTime = new Date(
+      newDate.getTime() + service.duration * 60 * 1000
+    );
+
+    //Salon opening and closing time(Creating the working hours
+    //  boundaries for the new appointment date)
+    const [openingHour, openingMinute] = 
+    salon.openingTime.split(":").map(Number);
+
+    const [closingHour, closingMinute] = 
+    salon.closingTime.split(":").map(Number);
+
+    const salonOpening = new Date(newDate);
+
+    salonOpening.setUTCHours(
+      openingHour - 1,
+      openingMinute, 0, 0
+    );
+
+    const salonClosing = new Date(newDate);
+
+    salonClosing.setUTCHours(
+      closingHour - 1,
+      closingMinute, 0, 0
+    );
+
+
+
+
+
+
+
+
+
+
+
   }catch(error) {
     res.status(500).json({message: "Failed to reschedule appointment", error});
   }
