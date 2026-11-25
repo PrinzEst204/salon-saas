@@ -3,7 +3,8 @@ import {
     createCustomer, 
     getCustomersBySalon, 
     getCustomerById,
-    updateCustomer  } from "../controllers/customers.controller"
+    updateCustomer,
+    deleteCustomer  } from "../controllers/customers.controller"
 
 const router = Router()
 
@@ -14,5 +15,7 @@ router.get("/salon/:salonId", getCustomersBySalon)
 router.get("/:customerId", getCustomerById );
 
 router.patch("/:customerId", updateCustomer);
+
+router.delete("/:customerId", deleteCustomer)
 
 export default router;

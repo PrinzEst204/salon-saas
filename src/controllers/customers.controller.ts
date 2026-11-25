@@ -62,3 +62,20 @@ export const updateCustomer = async ( req: Request, res: Response ) => {
         res.status(500).json({message: "Failed to update customer", error,});
     }
 };
+
+//Delete Customer by Id
+export const deleteCustomer = async ( req: Request, res: Response ) => {
+    try {
+        const { customerId } = req.params;
+
+        const customer = await Customer.findByIdAndDelete(customerId);
+
+        if (!customer) {
+            return res.status(404).json({message: "Customer not found"});
+        }
+
+        res.status(200).json({message: "Customer deleted successfully"});
+    } catch(error) {
+        res.status(500).json({message: "Failed to delete customer", error,});
+    }
+};
