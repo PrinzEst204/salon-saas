@@ -447,3 +447,20 @@ export const rescheduleAppointment = async ( req: Request, res: Response ) => {
     res.status(500).json({message: "Failed to reschedule appointment", error});
   }
 };
+
+//Get a single appointment by Id
+export const getAppointmentById = async ( req: Request, res: Response ) => {
+  try {
+    const { appointmentId} = req.params;
+
+    const appointment = await Appointment.findById(appointmentId);//Lets mongoDb retrieves a specific document by its id
+
+    if (!appointment) {
+      return res.status(404).json({message: "Appointment not found"});
+    }
+
+    res.status(200).json(appointment)
+  } catch(error) {
+    res.status(500).json({message: "Failed to fetch appointment", error});
+  }
+};
