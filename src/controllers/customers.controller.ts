@@ -24,3 +24,41 @@ export const getCustomersBySalon = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Failed to fetch customers", error });
     }
 };
+
+//Get customer by ID
+export const getCustomerById = async (req: Request, res: Response) => {
+    try {
+        const { customerId } = req.params;
+        const customer = await Customer.findById(customerId);
+
+        if (!customer) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
+
+        res.status(200).json(customer);
+    } catch (error) {
+        res.status(500).json({ message: "Failed to fetch customer", error });
+    }
+};
+
+//Update customer by ID
+export const updateCustomer = async ( req: Request, res: Response ) => {
+    try {
+        const { customerId } = req.params;
+
+        const customer = await Customer.findByIdAndUpdate(
+            customerId, req.body,
+            {
+                new: true,
+                runValidators: true,
+            }       
+        );
+
+        if (!customer) {
+            return res.status(404).json({message: "Customer not found"});
+        }
+        res.status(200).json(customer);
+    } catch(error) {
+        res.status(500).json({message: "Failed to update customer", error,});
+    }
+};
