@@ -1,9 +1,22 @@
 import { Request, Response } from "express";
 import { Customer } from "../models/customers.model";
+import { Salon } from "../models/salons.model";
 
 export const createCustomer = async ( req: Request, res: Response ) => {
     try {
         const customerData = req.body;
+
+        //Customer information validation check
+        if (!customerData.salonId || !customerData.name || !customerData.phone) {
+            return res.status(400).json({message: "salonId, name and phone number are required",});
+        }
+
+        //Validate salons existence when creating a customer
+        const salon = await Salon.findById(customerData.salonId)
+
+        if(!salon) {
+            return res.status(404).json({message: "Salon not found",});
+        }
 
         const customer = await Customer.create(customerData);
 
@@ -45,6 +58,17 @@ export const getCustomerById = async (req: Request, res: Response) => {
 export const updateCustomer = async ( req: Request, res: Response ) => {
     try {
         const { customerId } = req.params;
+
+        //Customer update validation check(so the customer cant accidentally
+        //  be updated with an empty required field)
+        if (
+            req.body.name=== "" ||
+            req.body.phone === "" ||
+            req.body.salonId === ""
+        ) {
+            return res.status(400).json({message: "Required fields cannot be empty"});
+        }
+
 
         const customer = await Customer.findByIdAndUpdate(
             customerId, req.body,

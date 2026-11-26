@@ -268,13 +268,23 @@ export const getAvailableSlots = async (
       //Calculating when every appointment starts and end
       for (const appointment of existingAppointments) {
 
-        const appointmentStart = new Date(
-          appointment.appointmentDate
-        );
-        const appointmentEnd = new Date(
-          appointmentStart.getTime() + serviceDurationMs
-        );
+       if (!appointment.serviceId) {
+        continue;
+       }
 
+      //For already booked appointments
+       const existingService = await Service.findById(appointment.serviceId);
+
+       if(!existingService) {
+        continue;
+       }
+
+       const appointmentStart = new Date(
+        appointment.appointmentDate
+       );
+       const appointmentEnd = new Date(
+        appointmentStart.getTime() + existingService.duration * 60 * 1000
+       );
         //Checking whether current slot overlaps with existing appointments
         if (
           currentSlot < appointmentEnd && currentSlot.getTime() + 
@@ -346,6 +356,11 @@ export const rescheduleAppointment = async ( req: Request, res: Response ) => {
 
     if (!appointment) {
       return res.status(404).json({message: "Appointment not found"})
+    }
+
+    //Check if the appointment is already cancelled(avoid re-booking already cancelled appointments)
+    if (appointment.status === "cancelled") {
+      return res.status(400).json({message: "Cancelled appointments cannot be rescheduled",});
     }
 
     //Adding new appointment date to existing appointment
