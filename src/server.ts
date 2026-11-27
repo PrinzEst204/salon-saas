@@ -1,7 +1,7 @@
 import express, {type Request, type Response} from 'express';
+import cors from "cors";
 import dotenv from 'dotenv';
 import connectDB from './config/database'
-import cors from "cors";
 import dns from 'node:dns';
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 import serviceRoutes from './routes/services.routes';
@@ -16,7 +16,7 @@ const PORT:number = Number(process.env.PORT) || 3000;
 const app = express();
 
 app.use(cors({
-    origin: "https://localhost:5173",
+    origin: ["https://localhost:5173"],
 })
 );
 
