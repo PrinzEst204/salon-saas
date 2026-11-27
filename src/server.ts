@@ -1,6 +1,7 @@
 import express, {type Request, type Response} from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/database'
+import cors from "cors";
 import dns from 'node:dns';
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 import serviceRoutes from './routes/services.routes';
@@ -13,6 +14,8 @@ dotenv.config();
 const PORT:number = Number(process.env.PORT) || 3000;
 
 const app = express();
+
+app.use(cors());
 
 app.use(express.json());
 
