@@ -15,7 +15,7 @@ router.get("/salon/:salonId", getAppointmentsBySalon);
 
 router.get("/available-slots", getAvailableSlots);
 
-router.get("/:appointmentId", getAppointmentById);
+router.get("/:appointmentId", getAppointmentById);//fetch appointment by ID route
 
 router.patch("/:appointmentId/cancel", cancelAppointment)//Appointment cancellation route
 
