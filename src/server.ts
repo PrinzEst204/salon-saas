@@ -15,7 +15,10 @@ const PORT:number = Number(process.env.PORT) || 3000;
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: "https://localhost:5173",
+})
+);
 
 app.use(express.json());
 
